@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
-        "@toolhub/shared": path.resolve(__dirname, "../toolhub-be/shared/src/index.ts"),
+        "@toolhub/shared": path.resolve(__dirname, "./shared/src/index.ts"),
       },
     },
     server: {

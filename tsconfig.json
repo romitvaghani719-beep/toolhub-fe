@@ -17,8 +17,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@toolhub/shared": ["../toolhub-be/shared/src/index.ts"],
-      "@toolhub/shared/*": ["../toolhub-be/shared/src/*"]
+      "@toolhub/shared": ["./shared/src/index.ts"],
+      "@toolhub/shared/*": ["./shared/src/*"]
     }
   },
   "include": ["src"]
