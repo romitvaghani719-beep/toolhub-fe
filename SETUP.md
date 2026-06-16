@@ -7,14 +7,13 @@
 ```env
 VITE_FE_URL=http://localhost:5173
 VITE_BE_URL=http://localhost:3001
-VITE_API_URL=/api
 ```
 
 | Variable | Purpose |
 |----------|---------|
 | `VITE_FE_URL` | Frontend public URL |
-| `VITE_BE_URL` | Backend URL (Vite dev proxy target) |
-| `VITE_API_URL` | Path/URL the browser uses for API calls |
+| `VITE_BE_URL` | Backend URL — browser calls `{VITE_BE_URL}/api` |
+| `VITE_API_URL` | Optional full API base URL override |
 
 ### Backend (`toolhub-be/.env`)
 
@@ -33,9 +32,9 @@ FE_URL=http://localhost:5173,http://localhost:5174
 ## Local development
 
 ```
-Browser → http://localhost:5173/api/tools
-         ↓ (Vite proxy uses VITE_BE_URL)
-Backend → http://localhost:3001/api/tools
+Browser → http://localhost:3001/api/tools
+         (direct call using VITE_BE_URL)
+Backend → responds with JSON
 ```
 
 CORS: backend only allows origins listed in `FE_URL`.
@@ -56,34 +55,18 @@ npm run dev
 
 ## Production
 
-### Same domain (Vercel rewrites — recommended)
+Same env pattern as local — only the URLs change.
 
-**FE**
+**FE (Vercel)**
 ```env
-VITE_FE_URL=https://yourapp.vercel.app
-VITE_BE_URL=https://yourapp.vercel.app
-VITE_API_URL=/api
+VITE_FE_URL=https://toolhub-fe.vercel.app
+VITE_BE_URL=https://toolhub-be.vercel.app
 ```
 
-**BE**
+**BE (Vercel)**
 ```env
-BE_URL=https://yourapp.vercel.app
-FE_URL=https://yourapp.vercel.app
-```
-
-### Separate API domain
-
-**FE**
-```env
-VITE_FE_URL=https://app.yourdomain.com
-VITE_BE_URL=https://api.yourdomain.com
-VITE_API_URL=https://api.yourdomain.com
-```
-
-**BE**
-```env
-BE_URL=https://api.yourdomain.com
-FE_URL=https://app.yourdomain.com
+BE_URL=https://toolhub-be.vercel.app
+FE_URL=https://toolhub-fe.vercel.app
 ```
 
 ---

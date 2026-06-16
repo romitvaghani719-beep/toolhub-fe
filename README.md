@@ -10,7 +10,7 @@ npm install
 
 Create `.env`:
 ```env
-VITE_API_URL=/api
+VITE_BE_URL=http://localhost:3001
 ```
 
 ## Run

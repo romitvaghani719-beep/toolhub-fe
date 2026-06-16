@@ -10,13 +10,12 @@ function resolveApiUrl(): string {
   const explicitApiUrl = (env.VITE_API_URL as string | undefined)?.trim();
   if (explicitApiUrl) return trimTrailingSlash(explicitApiUrl);
 
-  // In local dev we rely on Vite proxy for /api -> VITE_BE_URL.
-  if (env.DEV) return "/api";
-
   const backendBaseUrl = (env.VITE_BE_URL as string | undefined)?.trim();
-  if (backendBaseUrl) return `${trimTrailingSlash(backendBaseUrl)}/api`;
+  if (!backendBaseUrl) {
+    throw new Error("Set VITE_BE_URL (or VITE_API_URL) in your .env file.");
+  }
 
-  return "/api";
+  return `${trimTrailingSlash(backendBaseUrl)}/api`;
 }
 
 const API_URL = resolveApiUrl();
