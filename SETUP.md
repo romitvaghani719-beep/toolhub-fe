@@ -19,13 +19,15 @@ VITE_BE_URL=http://localhost:3001
 
 ```env
 BE_URL=http://localhost:3001
-FE_URL=http://localhost:5173,http://localhost:5174
+FE_URL=http://localhost:5173
 ```
 
 | Variable | Purpose |
 |----------|---------|
-| `BE_URL` | Backend public URL (docs / reference) |
-| `FE_URL` | Allowed CORS origins (comma-separated) |
+| `BE_URL` | Backend public URL (must match `VITE_BE_URL` on FE) |
+| `FE_URL` | Allowed CORS origins (must match `VITE_FE_URL` on FE) |
+
+**Rule:** `VITE_BE_URL` (FE) = `BE_URL` (BE), and `VITE_FE_URL` (FE) = value in `FE_URL` (BE).
 
 ---
 
@@ -37,7 +39,7 @@ Browser → http://localhost:3001/api/tools
 Backend → responds with JSON
 ```
 
-CORS: backend only allows origins listed in `FE_URL`.
+CORS: in development, any `http://localhost:*` origin is allowed automatically.
 
 **Terminal 1 — Backend:**
 ```bash
@@ -68,6 +70,8 @@ VITE_BE_URL=https://toolhub-be.vercel.app
 BE_URL=https://toolhub-be.vercel.app
 FE_URL=https://toolhub-fe.vercel.app
 ```
+
+If you get a CORS error in production, check that `FE_URL` on BE **exactly** matches the browser origin (`VITE_FE_URL` on FE). No trailing slash.
 
 ---
 

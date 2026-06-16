@@ -189,17 +189,35 @@ const MEMBER_STATS = {
 
 const TEMPLATE_JSON = `[
   {
-    "name": "Example Tool",
-    "website": "example.ai",
-    "category": "chat",
+    "name": "Your Tool Name",
     "description": "Short description of what the tool does.",
-    "tags": ["LLM", "Assistant"],
-    "apiAvailable": true,
-    "freePlan": true,
-    "openSource": false,
-    "pricing": "Freemium · $20/mo",
-    "models": ["GPT-4o"],
-    "features": ["Feature one", "Feature two"]
+    "website_url": "https://your-tool-website.com",
+    "category": "chat",
+    "logo_color": "oklch(0.6 0.15 250)",
+    "tags": ["Tag 1", "Tag 2", "Tag 3"],
+    "votes": 0,
+    "api_available": false,
+    "free_plan": true,
+    "open_source": false,
+    "pricing": "Freemium · $XX/mo",
+    "automation": "API / Webhooks / Zapier",
+    "community": "Discord / Forum / Docs",
+    "models": ["Model 1", "Model 2"],
+    "features": [
+      "Feature one",
+      "Feature two",
+      "Feature three"
+    ],
+    "ai_capabilities": [
+      "Capability one",
+      "Capability two"
+    ],
+    "use_cases": [
+      "Use case one",
+      "Use case two",
+      "Use case three"
+    ],
+    "featured": false
   }
 ]`;
 

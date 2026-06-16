@@ -91,7 +91,7 @@ export default function AdminPage() {
 
       {!isLoading && data && (
         <>
-        <div className="table-wrap">
+        <div className="table-wrap admin-table">
           <table className="table">
             <thead>
               <tr>
@@ -147,6 +147,55 @@ export default function AdminPage() {
               ))}
             </tbody>
           </table>
+        </div>
+
+        <div className="admin-cards">
+          {data.items.map((u) => (
+            <div key={u.id} className="admin-card">
+              <div className="admin-card__head">
+                <div>
+                  <div className="admin-card__name">{u.name}</div>
+                  <div className="admin-card__email">{u.email}</div>
+                </div>
+                <select
+                  className="select"
+                  value={u.role}
+                  onChange={(e) =>
+                    updateUser.mutate({
+                      id: u.id,
+                      role: e.target.value as "admin" | "user",
+                    })
+                  }
+                >
+                  <option value="user">user</option>
+                  <option value="admin">admin</option>
+                </select>
+              </div>
+              <div className="admin-card__meta">
+                <span className="admin-card__created">
+                  Created {new Date(u.created_at).toLocaleDateString()}
+                </span>
+                <div className="admin-card__actions">
+                  <Button
+                    variant="outline"
+                    size="icon-sm"
+                    onClick={() => openEditModal(u)}
+                    aria-label="Edit user"
+                  >
+                    <Pencil size={15} />
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="icon-sm"
+                    onClick={() => deleteUser.mutate(u.id)}
+                    aria-label="Delete user"
+                  >
+                    <Trash2 size={15} />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
 
         <Pagination page={data.page} totalPages={data.totalPages} onPageChange={setPage} />

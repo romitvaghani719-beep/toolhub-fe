@@ -6,7 +6,8 @@ import { z } from "zod";
 import { useNavigate, useParams } from "react-router-dom";
 import { useCreateTool, useTool, useUpdateTool } from "@/hooks/use-api";
 import { Button } from "@/components/ui/button";
-import { Upload, FileJson, Check, ArrowRight, ArrowLeft } from "lucide-react";
+import { Upload, FileJson, Check, ArrowRight, ArrowLeft, Download } from "lucide-react";
+import { TOOL_JSON_TEMPLATE } from "@/lib/tool-json-template";
 
 const CATEGORIES = ["chat", "code", "image", "writing", "audio", "auto", "data", "search"];
 const STEPS = ["Basics", "Features", "Technical", "Business", "Review"];
@@ -501,9 +502,37 @@ export default function AddToolPage() {
                 }}
               />
             </div>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 8 }}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setImportJson(TOOL_JSON_TEMPLATE)}
+              >
+                <FileJson size={14} />
+                Load template
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const blob = new Blob([TOOL_JSON_TEMPLATE], { type: "application/json" });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = "tool-template.json";
+                  a.click();
+                  URL.revokeObjectURL(url);
+                }}
+              >
+                <Download size={14} />
+                Download template
+              </Button>
+            </div>
             <textarea
               className="code-area"
-              placeholder='{"name":"Orion Chat","category":"chat","tags":["LLM"]}'
+              placeholder={TOOL_JSON_TEMPLATE}
               value={importJson}
               onChange={(e) => setImportJson(e.target.value)}
             />
