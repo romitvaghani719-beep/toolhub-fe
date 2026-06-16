@@ -1,4 +1,25 @@
-const API_URL = (import.meta.env.VITE_API_URL as string) || "/api";
+function trimTrailingSlash(url: string): string {
+  return url.endsWith("/") ? url.slice(0, -1) : url;
+}
+
+function resolveApiUrl(): string {
+  const env = (import.meta as ImportMeta & {
+    env: Record<string, string | boolean | undefined>;
+  }).env;
+
+  const explicitApiUrl = (env.VITE_API_URL as string | undefined)?.trim();
+  if (explicitApiUrl) return trimTrailingSlash(explicitApiUrl);
+
+  // In local dev we rely on Vite proxy for /api -> VITE_BE_URL.
+  if (env.DEV) return "/api";
+
+  const backendBaseUrl = (env.VITE_BE_URL as string | undefined)?.trim();
+  if (backendBaseUrl) return `${trimTrailingSlash(backendBaseUrl)}/api`;
+
+  return "/api";
+}
+
+const API_URL = resolveApiUrl();
 
 export class ApiError extends Error {
   constructor(message: string, public status: number) {
