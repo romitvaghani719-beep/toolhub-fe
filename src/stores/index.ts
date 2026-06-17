@@ -1,6 +1,9 @@
-import type { Role } from "@toolhub/shared";
+import type { Role, SessionTokens } from "@toolhub/shared";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+
+/** Keep users signed in for 7 days (must match Supabase refresh token expiry). */
+export const SESSION_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 export interface AuthUser {
   id: string;
@@ -14,9 +17,14 @@ export interface AuthUser {
 interface AuthState {
   user: AuthUser | null;
   accessToken: string | null;
-  setAuth: (user: AuthUser, accessToken: string) => void;
+  refreshToken: string | null;
+  expiresAt: number | null;
+  sessionStartedAt: number | null;
+  setAuth: (user: AuthUser, session: SessionTokens) => void;
+  updateSession: (session: SessionTokens) => void;
   clearAuth: () => void;
   isAdmin: () => boolean;
+  isSessionExpired: () => boolean;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -24,9 +32,37 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       user: null,
       accessToken: null,
-      setAuth: (user, accessToken) => set({ user, accessToken }),
-      clearAuth: () => set({ user: null, accessToken: null }),
+      refreshToken: null,
+      expiresAt: null,
+      sessionStartedAt: null,
+      setAuth: (user, session) =>
+        set({
+          user,
+          accessToken: session.access_token,
+          refreshToken: session.refresh_token,
+          expiresAt: session.expires_at,
+          sessionStartedAt: Date.now(),
+        }),
+      updateSession: (session) =>
+        set({
+          accessToken: session.access_token,
+          refreshToken: session.refresh_token,
+          expiresAt: session.expires_at,
+        }),
+      clearAuth: () =>
+        set({
+          user: null,
+          accessToken: null,
+          refreshToken: null,
+          expiresAt: null,
+          sessionStartedAt: null,
+        }),
       isAdmin: () => get().user?.role === "admin",
+      isSessionExpired: () => {
+        const { sessionStartedAt } = get();
+        if (!sessionStartedAt) return true;
+        return Date.now() - sessionStartedAt > SESSION_MAX_AGE_MS;
+      },
     }),
     { name: "toolvault-auth" },
   ),

@@ -3,6 +3,7 @@ import type {
   CreateToolInput,
   CreateUserInput,
   LoginInput,
+  SessionTokens,
   UpdateToolInput,
   UpdateUserInput,
 } from "@toolhub/shared";
@@ -62,11 +63,11 @@ export function useLogin() {
   const setAuth = useAuthStore((s) => s.setAuth);
   return useMutation({
     mutationFn: (input: LoginInput) =>
-      api.post<{ session: { access_token: string }; user: User }>(
+      api.post<{ session: SessionTokens; user: User }>(
         "/auth/login",
         input,
       ),
-    onSuccess: (data) => setAuth(data.user, data.session.access_token),
+    onSuccess: (data) => setAuth(data.user, data.session),
   });
 }
 
