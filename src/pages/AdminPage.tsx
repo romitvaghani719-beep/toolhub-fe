@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createUserSchema, updateUserSchema } from "@toolhub/shared";
 import { Trash2, Pencil, Plus } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   useAdminUsers,
   useCreateUser,
@@ -15,11 +16,13 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 import Pagination from "@/components/Pagination";
 
 export default function AdminPage() {
+  const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const debouncedSearch = useDebounce(searchInput, 400);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
     setPage(1);
@@ -41,18 +44,20 @@ export default function AdminPage() {
     role: "admin" | "user";
   };
   const { register, handleSubmit, reset, formState: { errors } } = useForm<AdminUserFormValues>({
-    resolver: zodResolver(isEditing ? updateUserSchema : createUserSchema),
+    resolver: zodResolver(isEditing ? updateUserSchema : createUserSchema) as Resolver<AdminUserFormValues>,
     defaultValues: { role: "user", name: "", email: "", password: "" },
   });
 
   function openCreateModal() {
     setEditingUserId(null);
+    setFormError(null);
     reset({ name: "", email: "", password: "", role: "user" });
     setIsModalOpen(true);
   }
 
   function openEditModal(user: { id: string; name: string; email: string; role: "admin" | "user" }) {
     setEditingUserId(user.id);
+    setFormError(null);
     reset({ name: user.name, email: user.email, password: "", role: user.role });
     setIsModalOpen(true);
   }
@@ -60,6 +65,13 @@ export default function AdminPage() {
   function closeModal() {
     setIsModalOpen(false);
     setEditingUserId(null);
+    setFormError(null);
+    reset({ name: "", email: "", password: "", role: "user" });
+  }
+
+  async function handleFormSuccess() {
+    await queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+    closeModal();
   }
 
   return (
@@ -209,21 +221,29 @@ export default function AdminPage() {
               {isEditing ? "Update user" : "Create user"}
             </h2>
             <form
-              onSubmit={handleSubmit((formData) => {
-                if (isEditing && editingUserId) {
-                  updateUser.mutate(
-                    {
+              onSubmit={handleSubmit(async (formData) => {
+                setFormError(null);
+                try {
+                  if (isEditing && editingUserId) {
+                    await updateUser.mutateAsync({
                       id: editingUserId,
                       name: formData.name,
                       email: formData.email,
                       role: formData.role,
                       ...(formData.password ? { password: formData.password } : {}),
-                    },
-                    { onSuccess: closeModal },
-                  );
-                  return;
+                    });
+                  } else {
+                    await createUser.mutateAsync({
+                      name: formData.name,
+                      email: formData.email,
+                      password: formData.password ?? "",
+                      role: formData.role,
+                    });
+                  }
+                  await handleFormSuccess();
+                } catch (err) {
+                  setFormError(err instanceof Error ? err.message : "Request failed");
                 }
-                createUser.mutate(formData, { onSuccess: closeModal });
               })}
             >
               <div className="field-row">
@@ -242,6 +262,9 @@ export default function AdminPage() {
                 <div className="field">
                   <label className="field__label">Password</label>
                   <input className="input w-full" type="password" {...register("password")} />
+                  {errors.password && (
+                    <p className="text-sm text-red-600">{errors.password.message}</p>
+                  )}
                 </div>
                 <div className="field">
                   <label className="field__label">Role</label>
@@ -251,6 +274,7 @@ export default function AdminPage() {
                   </select>
                 </div>
               </div>
+              {formError && <p className="text-sm text-red-600">{formError}</p>}
               <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
                 <Button type="button" variant="outline" onClick={closeModal}>
                   Cancel
